@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Пескоструйная очистка — Интерактивный сайт</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121316;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    /* Фиксированная сцена для 3D-навеса, лестницы и пескоструйщика */
+    .scene-fixed {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 1200px;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* 3D-навес, опускающийся при скролле */
+    .canopy-3d {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 340px;
+      height: 60px;
+      background: linear-gradient(135deg, #3a3f47, #1e2229);
+      border-bottom: 4px solid #ff7b00;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      transition: transform 0.1s linear;
+    }
+
+    /* Ось винтовой лестницы */
+    .spiral-staircase {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 100%;
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+      border-right: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* Пескоструйщик */
+    .sandblaster {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      width: 70px;
+      height: 70px;
+      margin-left: -35px;
+      background: #ff7b00;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #121316;
+      box-shadow: 0 0 20px rgba(255, 123, 0, 0.6);
+      transition: transform 0.1s linear;
+    }
+
+    /* Сопло, которое направляется на объекты */
+    .nozzle {
+      position: absolute;
+      width: 60px;
+      height: 8px;
+      background: #00e5ff;
+      top: 50%;
+      left: 50%;
+      transform-origin: left center;
+      transform: translateY(-50%) rotate(90deg);
+      border-radius: 4px;
+      box-shadow: 0 0 12px #00e5ff;
+      transition: transform 0.25s ease-out, width 0.2s ease;
+    }
+
+    /* Секции сайта */
+    section {
+      min-height: 100vh;
+      padding: 80px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 5;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* Сетка объектов (диски сверху, грузовики снизу) */
+    .items-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin: auto 0;
+    }
+
+    .target-item {
+      width: 220px;
+      height: 220px;
+      background: #23272e;
+      border: 2px solid #444c56;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Круглая форма для автомобильных дисков */
+    .wheel-rim {
+      border-radius: 50%;
+    }
+
+    /* Прямоугольная форма для фотографий грузовиков */
+    .truck-photo {
+      width: 300px;
+      height: 200px;
+      border-radius: 12px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Эффект очистки при наведении мыши */
+    .target-item:hover {
+      border-color: #00e5ff;
+      background: #2c3540;
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Фиксированная анимационная группа -->
+  <div class="scene-fixed">
+    <div class="spiral-staircase"></div>
+    <div class="canopy-3d" id="canopy">3D-НАВЕС</div>
+    <div class="sandblaster" id="worker">
+      Мастер
+      <div class="nozzle" id="nozzle"></div>
+    </div>
+  </div>
+
+  <!-- ВЕРХНЯЯ СЕКЦИЯ: Легковые и грузовые диски -->
+  <section id="top-section">
+    <h2>Верхний уровень: Очистка автомобильных дисков</h2>
+    <div class="items-row">
+      <div class="target-item wheel-rim" data-target="rim">
+        Легковой диск<br>(Наведи курсор для очистки)
+      </div>
+      <div class="target-item wheel-rim" data-target="rim">
+        Грузовой диск<br>(Наведи курсор для очистки)
+      </div>
+    </div>
+  </section>
+
+  <!-- НИЖНЯЯ СЕКЦИЯ: Грузовые машины из фотографий -->
+  <section id="bottom-section">
+    <h2>Нижний уровень: Грузовые машины (из твоих фото)</h2>
+    <div class="items-row">
+      <!-- Сюда подставляются реальные фото грузовиков через background-image -->
+      <div class="target-item truck-photo" data-target="truck">
+        Фото грузовика №1<br>(Очистка после спуска с лестницы)
+      </div>
+      <div class="target-item truck-photo" data-target="truck">
+        Фото грузовика №2<br>(Очистка после спуска с лестницы)
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const worker = document.getElementById('worker');
+    const canopy = document.getElementById('canopy');
+    const nozzle = document.getElementById('nozzle');
+    const targets = document.querySelectorAll('.target-item');
+
+    // 1. Логика скролла: опускаем навес и ведем пескоструйщика по винтовой лестнице
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const progress = Math.min(Math.max(scrollY / maxScroll, 0), 1);
+
+      // Вертикальное смещение вниз по экрану
+      const verticalMove = progress * (window.innerHeight * 0.55);
+
+      // Имитация движения по спирали (винтовой лестнице) через синусоиду
+      const spiralAngle = progress * Math.PI * 4; // 2 полных витка лестницы
+      const spiralOffsetX = Math.sin(spiralAngle) * 50; // амплитуда шага по спирали
+
+      // Навес плавно опускается строго вертикально
+      canopy.style.transform = `translate(-50%, ${verticalMove}px)`;
+
+      // Пескоструйщик спускается вниз по спирали вместе с навесом
+      worker.style.transform = `translate(${spiralOffsetX}px, ${verticalMove}px)`;
+    });
+
+    // 2. Логика наведения мыши: направляем сопло точно на выбранный диск или грузовик
+    targets.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const itemRect = item.getBoundingClientRect();
+        const workerRect = worker.getBoundingClientRect();
+
+        // Вычисляем угол между пескоструйщиком и центром диска/грузовика
+        const deltaX = (itemRect.left + itemRect.width / 2) - (workerRect.left + workerRect.width / 2);
+        const deltaY = (itemRect.top + itemRect.height / 2) - (workerRect.top + workerRect.height / 2);
+        const angleDeg = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+        // Поворачиваем сопло и удлиняем струю песка
+        nozzle.style.transform = `translateY(-50%) rotate(${angleDeg}deg)`;
+        nozzle.style.width = '110px';
+      });
+
+      item.addEventListener('mouseleave', () => {
+        // Возвращаем сопло в нейтральное положение
+        nozzle.style.width = '60px';
+        nozzle.style.transform = `translateY(-50%) rotate(90deg)`;
+      });
+    });
+  </script>
+</body>
+</html>
